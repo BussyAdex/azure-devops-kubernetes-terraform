@@ -32,3 +32,5 @@ build/
 
 ### VS Code ###
 .vscode/
+azure_rsa
+azure_rsa.pub
