@@ -55,16 +55,17 @@ stages:
       inputs:
         buildType: 'current'
         artifactName: 'manifests'
-        itemPattern: '**/.yaml'
-        targetPath: '$(Pipeline.ArtifactsDirectory)'
-    - task: KubernetesManifest@1
+        itemPattern: '**/*.yaml' # Updated item pattern
+        targetPath: '$(System.ArtifactsDirectory)' # Updated target path
+
+    - task: KubernetesManifest@0
       inputs:
         action: 'deploy'
-        connectionType: 'kubernetesServiceConnection'
         kubernetesServiceConnection: 'azure-kubernetes-connection'
         namespace: 'default'
-        manifests: '$(Pipeline.ArtifactsDirectory)/configuration/kubernetes/deployment.yaml'
+        manifests: '$(System.ArtifactsDirectory)/manifests/configuration/kubernetes/deployment.yaml' # Updated manifests path
         containers: 'bussyadex42/currency-exchange-devops:$(tag)'
+
 # Stage 2
 # Download the K8S Files
 # Deploy to K8S CLuster with Docker Image
