@@ -5,7 +5,7 @@ resources:
 - repo: self
 
 variables:
-  tag: '$(Build.BuildId)'
+  tag: 0.0.1.RELEASE #'$(Build.BuildId)'
 
 stages:
 
@@ -22,13 +22,13 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'bussyadex-docker-hub'
-        repository: 'bussyadex42/currency-exchange-devops'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: '$(tag)'
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'bussyadex-docker-hub'
+    #     repository: 'bussyadex42/currency-exchange-devops'
+    #     command: 'buildAndPush'
+    #     Dockerfile: '**/Dockerfile'
+    #     tags: '$(tag)'
     - task: CopyFiles@2
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)'
@@ -41,7 +41,6 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'manifests'
         publishLocation: 'Container'
-        MaxArtifactSize: 5
 
 - stage: Deploy
   displayName: Deploy image
@@ -55,15 +54,15 @@ stages:
       inputs:
         buildType: 'current'
         artifactName: 'manifests'
-        itemPattern: '**/*.yaml' # Updated item pattern
-        targetPath: '$(System.ArtifactsDirectory)' # Updated target path
+        itemPattern: '**/*.yaml'
+        targetPath: '$(System.ArtifactsDirectory)'
 
     - task: KubernetesManifest@0
       inputs:
         action: 'deploy'
         kubernetesServiceConnection: 'azure-kubernetes-connection'
         namespace: 'default'
-        manifests: '$(System.ArtifactsDirectory)/manifests/configuration/kubernetes/deployment.yaml' # Updated manifests path
+        manifests: '$(System.ArtifactsDirectory)/configuration/kubernetes/deployment.yaml'
         containers: 'bussyadex42/currency-exchange-devops:$(tag)'
 
 # Stage 2
