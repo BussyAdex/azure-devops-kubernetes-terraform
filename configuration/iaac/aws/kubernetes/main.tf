@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 4.57.0" # Choose the version that best fits your needs
+      version = ">= 3.56.0" # Setting the minimum to 3.56.0 as per module requirements
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -11,8 +11,8 @@ terraform {
     // Add other providers here if necessary
   }
   backend "s3" {
-    bucket = "mybucket" # Will be overridden from build
-    key    = "path/to/my/key" # Will be overridden from build
+    bucket = "mybucket"
+    key    = "path/to/my/key"
     region = "us-east-1"
   }
 }
@@ -49,33 +49,11 @@ module "in28minutes-cluster" {
       min_capacity     = 3
 
       instance_type = "t2.micro"
-      # Other required node group configurations...
+      // Other required node group configurations...
     }
   }
 
-  # Include other module configurations as necessary
+  // Include other module configurations as necessary
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = module.in28minutes-cluster.cluster_id
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.in28minutes-cluster.cluster_id
-}
-
-resource "kubernetes_cluster_role_binding" "example" {
-  metadata {
-    name = "fabric8-rbac"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = "default"
-    namespace = "default"
-  }
-}
+// ... rest of your configuration
