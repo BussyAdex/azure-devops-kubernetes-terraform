@@ -39,18 +39,16 @@ module "bussyadex42-cluster" {
 
   cluster_name    = "bussyadex42-cluster"
   cluster_version = "1.21"  
-  
   vpc_id          = aws_default_vpc.default.id
   subnet_ids      = data.aws_subnet_ids.subnets.ids  
 
   node_groups = {
     example = {
-      {
-        instance_type     = "t2.micro"
-        max_capacity      = 5
-        desired_capacity  = 3
-        min_capacity      = 1
-      }
+      instance_type     = "t2.micro"
+      max_capacity      = 5
+      desired_capacity  = 3
+      min_capacity      = 1
+      // Add other required node group configuration here
     }
   }
 }
