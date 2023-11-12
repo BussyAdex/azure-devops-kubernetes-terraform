@@ -1,50 +1,54 @@
-# aws --version
-# aws eks --region us-east-1 update-kubeconfig --name in28minutes-cluster
-# Uses default VPC and Subnet. Create Your Own VPC and Private Subnets for Prod Usage.
-# terraform-backend-state-in28minutes-123
-# AKIA4AHVNOD7OOO6T4KI
-# arn:aws:s3:::terraform-backend-state-bussyadex42-123
-# AKIAQRIH25L6N6CH34MJ
-
 terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 4.57.0"  
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.10.0" 
+    }
+  }
   backend "s3" {
-    bucket = "mybucket"
-    key    = "path/to/my/key" 
+    bucket = "terraform-backend-state-bussyadex42-123"
+    key    = "kubernetes-dev.tfstate" 
     region = "us-east-1"
   }
 }
 
-resource "aws_default_vpc" "default" {
-
+provider "aws" {
+  region = "us-east-1"
 }
+
+resource "aws_default_vpc" "default" {}
 
 data "aws_subnet_ids" "subnets" {
   vpc_id = aws_default_vpc.default.id
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint #module.in28minutes-cluster.cluster_endpoint
+  host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.cluster.token
   load_config_file       = false
-  version                = "~> 1.9"
 }
 
 module "bussyadex42-cluster" {
   source          = "terraform-aws-modules/eks/aws"
+  version         = "19.19.1"  
   cluster_name    = "bussyadex42-cluster"
-  cluster_version = "1.14"
-  subnet_ids      = ["subnet-02cdd8da9556ba2ef", "subnet-0e5f34ce7408c50e1"]
+  cluster_version = "1.21"  
   vpc_id          = aws_default_vpc.default.id
+  subnet_ids      = data.aws_subnet_ids.subnets.ids  
 
-  node_group = [
-    {
+  node_groups = {
+    ng1 = {
       instance_type = "t2.micro"
       max_capacity  = 5
       desired_capacity = 3
       min_capacity  = 3
     }
-  ]
+  }
 }
 
 data "aws_eks_cluster" "cluster" {
