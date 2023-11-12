@@ -53,6 +53,7 @@ module "bussyadex42-cluster" {
       }
     }
   }
+}
 
 data "aws_eks_cluster" "cluster" {
   name = module.bussyadex42-cluster.cluster_id
