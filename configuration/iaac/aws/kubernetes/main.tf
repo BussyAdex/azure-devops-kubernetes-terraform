@@ -35,20 +35,19 @@ provider "kubernetes" {
 
 module "bussyadex42-cluster" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.19.1"  
+  version = "19.19.0"  
 
   cluster_name    = "bussyadex42-cluster"
   cluster_version = "1.21"  
   vpc_id          = aws_default_vpc.default.id
   subnet_ids      = data.aws_subnet_ids.subnets.ids  
 
-  worker_groups = [
+  node_group = [
     {
-      name          = "worker-group-1"
       instance_type = "t2.micro"
-      asg_max_size  = 5
-      asg_min_size  = 3
-      
+      max_capacity  = 5
+      desired_capacity = 3
+      min_capacity  = 3
     }
   ]
 }
