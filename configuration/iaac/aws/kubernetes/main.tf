@@ -44,14 +44,15 @@ module "bussyadex42-cluster" {
   subnet_ids      = data.aws_subnet_ids.subnets.ids  
 
   node_groups = {
-    example {
-      instance_type = "t2.micro"
-      max_capacity  = 5
-      desired_capacity = 3
-      min_capacity  = 1
+    example={
+      {
+        instance_type = "t2.micro"
+        max_capacity  = 5
+        desired_capacity = 3
+        min_capacity  = 1
+      }
     }
   }
-}
 
 data "aws_eks_cluster" "cluster" {
   name = module.bussyadex42-cluster.cluster_id
