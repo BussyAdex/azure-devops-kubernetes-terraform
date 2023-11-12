@@ -42,7 +42,7 @@ module "bussyadex42-cluster" {
   vpc_id          = aws_default_vpc.default.id
   subnet_ids      = data.aws_subnet_ids.subnets.ids  
 
-  node_group = [
+  worker_groups = [
     {
       instance_type = "t2.micro"
       max_capacity  = 5
