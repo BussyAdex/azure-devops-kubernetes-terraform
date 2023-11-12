@@ -8,6 +8,7 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.12"
     }
+    // Add other providers here if necessary
   }
   backend "s3" {
     bucket = "mybucket" # Will be overridden from build
@@ -16,7 +17,6 @@ terraform {
   }
 }
 
-# Only one AWS provider should be declared.
 provider "aws" {
   region = "us-east-1"
 }
@@ -27,7 +27,6 @@ data "aws_subnet_ids" "subnets" {
   vpc_id = aws_default_vpc.default.id
 }
 
-# Remove the version from the Kubernetes provider block.
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
@@ -35,21 +34,26 @@ provider "kubernetes" {
 }
 
 module "in28minutes-cluster" {
-  source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = "in28minutes-cluster"
-  cluster_version = "1.14"
-  vpc_id          = aws_default_vpc.default.id
+  source  = "terraform-aws-modules/eks/aws"
+  version = "17.24.0" # Specify the module version that is compatible with your inputs
 
+  cluster_name    = "in28minutes-cluster"
+  cluster_version = "1.21" # Use a supported version
+  vpc_id          = aws_default_vpc.default.id
   subnets         = data.aws_subnet_ids.subnets.ids
+
   node_groups = {
     ng1 = {
-      name             = "ng1"
-      instance_type    = "t2.micro"
-      asg_max_size     = 5
-      asg_desired_capacity = 3
-      asg_min_size     = 3
+      desired_capacity = 3
+      max_capacity     = 5
+      min_capacity     = 3
+
+      instance_type = "t2.micro"
+      # Other required node group configurations...
     }
   }
+
+  # Include other module configurations as necessary
 }
 
 data "aws_eks_cluster" "cluster" {
