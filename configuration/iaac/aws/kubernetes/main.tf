@@ -1,17 +1,8 @@
-# aws --version
-# aws eks --region us-east-1 update-kubeconfig --name in28minutes-cluster
-# Uses default VPC and Subnet. Create Your Own VPC and Private Subnets for Prod Usage.
-## terraform-backend-state-in28minutes-123
-# arn:aws:s3:::bucket-in28min-2345
-# AKIAQRIH25L6N6CH34MJ
-## AKIA4AHVNOD7OOO6T4KI
-
-
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0" # Example version, replace with the version you need
+      version = "~> 3.0" # Choose the version that best fits your needs
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -25,43 +16,40 @@ terraform {
   }
 }
 
+# Only one AWS provider should be declared.
 provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_default_vpc" "default" {
-
-}
+resource "aws_default_vpc" "default" {}
 
 data "aws_subnet_ids" "subnets" {
   vpc_id = aws_default_vpc.default.id
 }
 
+# Remove the version from the Kubernetes provider block.
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.cluster.token
-  version                = "~> 2.12"
 }
 
 module "in28minutes-cluster" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "in28minutes-cluster"
   cluster_version = "1.14"
-  subnets         = ["subnet-02cdd8da9556ba2ef", "subnet-0e5f34ce7408c50e1"] #CHANGE
-  #subnets = data.aws_subnet_ids.subnets.ids
+  subnets         = data.aws_subnet_ids.subnets.ids # Use the subnets from the data source
   vpc_id          = aws_default_vpc.default.id
 
-  #vpc_id         = "vpc-1234556abcdef"
-
-  node_groups = [
-    {
-      instance_type = "t2.micro"
-      max_capacity  = 5
-      desired_capacity = 3
-      min_capacity  = 3
+  node_groups = {
+    ng1 = {
+      name             = "ng1"
+      instance_type    = "t2.micro"
+      asg_max_size     = 5
+      asg_desired_capacity = 3
+      asg_min_size     = 3
     }
-  ]
+  }
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -72,10 +60,6 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.in28minutes-cluster.cluster_id
 }
 
-
-# We will use ServiceAccount to connect to K8S Cluster in CI/CD mode
-# ServiceAccount needs permissions to create deployments 
-# and services in default namespace
 resource "kubernetes_cluster_role_binding" "example" {
   metadata {
     name = "fabric8-rbac"
@@ -90,9 +74,4 @@ resource "kubernetes_cluster_role_binding" "example" {
     name      = "default"
     namespace = "default"
   }
-}
-
-# Needed to set the default region
-provider "aws" {
-  region  = "us-east-1"
 }
