@@ -38,9 +38,9 @@ module "in28minutes-cluster" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "in28minutes-cluster"
   cluster_version = "1.14"
-  subnets         = data.aws_subnet_ids.subnets.ids # Use the subnets from the data source
   vpc_id          = aws_default_vpc.default.id
 
+  subnets         = data.aws_subnet_ids.subnets.ids
   node_groups = {
     ng1 = {
       name             = "ng1"
