@@ -18,7 +18,8 @@ resource "aws_default_vpc" "default" {
 }
 
 data "aws_subnet_ids" "subnets" {
-  vpc_id = aws_default_vpc.default.id
+  #vpc_id = aws_default_vpc.default.id
+  vpc_id = 	vpc-0db7c6682b4c8b616
 }
 
 
