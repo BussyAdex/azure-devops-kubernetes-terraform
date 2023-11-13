@@ -22,7 +22,7 @@ data "aws_vpc" "selected_vpc" {
 }
 
 data "aws_subnet_ids" "subnets" {
-  vpc_id = data.aws_vpc.selected_vpc.id
+  vpc_id = vpc-0db7c6682b4c8b616#data.aws_vpc.selected_vpc.id
 }
 
 
