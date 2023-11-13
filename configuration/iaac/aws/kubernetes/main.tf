@@ -17,8 +17,12 @@ resource "aws_default_vpc" "default" {
 
 }
 
+data "aws_vpc" "selected_vpc" {
+  default = true  # This selects the default VPC in your AWS account.
+}
+
 data "aws_subnet_ids" "subnets" {
-  vpc_id = aws_default_vpc.default.id
+  vpc_id = data.aws_vpc.selected_vpc.id
 }
 
 
