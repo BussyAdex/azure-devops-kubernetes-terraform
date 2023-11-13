@@ -6,6 +6,13 @@ terraform {
   }
 }
 
+provider "kubernetes" {
+  //>>Uncomment this section once EKS is created - Start
+  host                   = data.aws_eks_cluster.cluster.endpoint #module.in28minutes-cluster.cluster_endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+  //>>Uncomment this section once EKS is created - End
+}
 module "bussyadex42-cluster" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.0"
